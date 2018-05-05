@@ -3,7 +3,7 @@
 class Sudoku {
   constructor(board_string) {
     this.input = board_string;
-    this.board = [];
+    this.board = this.generateBoard();
     
   }
 
@@ -18,7 +18,7 @@ class Sudoku {
            arr=[];
         } 
       }
-     this.board = multiDim
+    // this.board = multiDim
      return multiDim;
   }
 
@@ -155,17 +155,12 @@ class Sudoku {
   var arrIndex0=[];
   for(var i=0;i<this.board.length;i++) {
     for(var j=0;j<this.board[i].length;j++){
-        var objIndex0={};
-        objIndex0.x=0;
-        objIndex0.y=0;
-        objIndex0.psb=[];
       if(this.board[i][j]===0) {
-        for(var k=9;k>0;k--){
-          objIndex0.x=i;
-          objIndex0.y=j;
-          objIndex0.psb.push(k)
-        }
-      arrIndex0.push(objIndex0)       
+          //console.log(this.board[i][j])
+          var objIndex0={};
+          objIndex0.baris=i;
+          objIndex0.kolom=j;
+          arrIndex0.push(objIndex0)      
       }
     } 
   }
@@ -173,28 +168,52 @@ class Sudoku {
  }
 
  solve() {
-    var xIndex0=0;
-    var yIndex0=0;
-    
-    for(let i=0;i<this.board.length;i++) {
-      for(let j=0;j<this.board[i].length;j++){
-        if(this.board[i][j]===0){
-          xIndex0=i;
-          yIndex0=j;
-          for(var k=9;k>0;k--){
-            if(this.checkRow(i,k) && this.checkColumn(j,k) && this.checkSquare(xIndex0,yIndex0,k)){
-              this.board[i][j]=k;
-              //console.log(this.board[i][j]==k)
-            }       
-          }    
-           
+   
+    //console.log(zeroPos)
+    for(let i=0;i<zeroPos.length;i++) {
+      //console.log(i,zeroPos.length)
+        for(let k=1;k<=9;k++){
+            // console.log("masuk",[zeroPos[i].baris],[zeroPos[i].kolom],i)
+            if(this.checkRow(zeroPos[i].baris,k) && this.checkColumn(zeroPos[i].kolom,k) && this.checkSquare(zeroPos[i].baris,zeroPos[i].kolom,k)){
+              this.board[zeroPos[i].baris][zeroPos[i].kolom]=k;
+              //console.log("xxx",[zeroPos[i].baris],[zeroPos[i].kolom])
+            }
         }
-      } 
+        if(this.board[zeroPos[i].baris][zeroPos[i].kolom]==0 ){
+          var status=false
+          var temp2=i;
+          while(status == false){
+            var temp=i;
+            temp2=temp2-1
+            // console.log("zzz",temp2)
+            //   console.log("temp2=",temp2,"i=",i,"value=",this.board[zeroPos[temp2].baris][zeroPos[temp2].kolom])
+            //   console.log(this.generateBoard())
+            //   console.log(===============)
+            //   console.log(this.board)
+            for(let k=1;k<=9;k++){
+              // console.log("xxx",k)
+              if(this.checkRow(zeroPos[temp2].baris,k) && this.checkColumn(zeroPos[temp2].kolom,k) && this.checkSquare(zeroPos[temp2].baris,zeroPos[temp2].kolom,k)){
+               this.board[zeroPos[temp2].baris][zeroPos[temp2].kolom]=k;
+              }
+              for(let k=1;k<=9;k++) {
+                if(this.checkRow(zeroPos[temp].baris,k) && this.checkColumn(zeroPos[temp].kolom,k) && this.checkSquare(zeroPos[temp].baris,zeroPos[temp].kolom,k)){
+                  this.board[zeroPos[temp].baris][zeroPos[temp].kolom]=k;
+                  status=true;
+                }  
+              }
+              
+            }  
+          }  
+        }    
     }
-    return this.board;  
-  }
+    return this.board;
+  } 
 
-} 
+
+}
+
+
+
 
 
 
@@ -204,18 +223,18 @@ class Sudoku {
 var fs = require('fs')
 var board_string = fs.readFileSync('set-01_sample.unsolved.txt')
   .toString()
-  .split("\n")[2]
+  .split("\n")[3]
+//Note:work only case 0 until 3, error in backtrack
 
 var game = new Sudoku(board_string)
-
-// Remember: this will just fill out what it can and not "guess"
-game.generateBoard();
-
+var zeroPos=game.checkPsb()
+//console.log(zeroPos);
 
 console.log("===========SOAL===========")
 console.log(game.generateBoard())
 console.log("\n")
-//console.log(game.checkPsb());
+
 console.log("===========JAWABAN===========")
 console.log(game.solve())
+
 //  
