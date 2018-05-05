@@ -13,7 +13,8 @@ class Sudoku {
    */
   constructor(board_string) {
     this.board_string = board_string;
-    this.board_arr = [];
+    this.board_arr = this.generateBoard(this.board_string);
+    this.tempBoard = this.generateTempBoard();
   }
 
   /**
@@ -24,17 +25,30 @@ class Sudoku {
   generateBoard(string) {
     const arr = [];
     let j = -1;
-    const template = string || new Array(81).fill([]);
+    let template = string.length > 0 ? string : new Array(81).fill(0);
     for(let i = 0; i < template.length; i += 1) {
       if (i % 9 === 0) {
         arr.push([]);
         j += 1;
       }
+      
+      arr[j].push(+template[i]);
+    }
 
-      if (!string && this.board_string[i] != 0) {
+    return arr;
+  }
+
+  generateTempBoard() {
+    const arr = [];
+    const template = new Array(81).fill([]);
+    let j = -1;
+    for(let i = 0; i < template.length; i += 1) {
+      if (i % 9 === 0) {
+        arr.push([]);
+        j += 1;
+      }
+      if (this.board_string.length > 0 && this.board_string[i] != 0) {
         arr[j].push(1);
-      } else if (string) {
-        arr[j].push(+template[i]);
       } else {
         arr[j].push(template[i]);
       }
@@ -74,68 +88,77 @@ class Sudoku {
    * @function - this function will solve sudoku problem in this sudoku object, for every loop in 0, it will generate every possible moves for that coordinate and saves them to moves array and then stores moves array to tempBoard in exactly same coordinate, if no move is possible it will activated backtrack mode and change every possible move in previous coordinates until it works. Then this function will assign completed board to this.board_arr property of this sudoku object
    */
   solve() {
-    const board = this.generateBoard(this.board_string);
-    const tempBoard = this.generateBoard();
+    console.log('Problem : ');
+    console.log(this.board_arr);
+    const start = new Date().getTime();
     let x = 0;
     let y = 0;
     let backtrack = false;
     let counter = 0;
-    while (x < board.length) {
-      if (tempBoard[x][y] !== 1) {
+    while (x < this.board_arr.length) {
+      if (this.tempBoard[x][y] !== 1) {
         counter += 1;
         if (backtrack) {
-          const moves = tempBoard[x][y];
-          const newIdx = moves.indexOf(board[x][y]) + 1;
+          const moves = this.tempBoard[x][y];
+          const newIdx = moves.indexOf(this.board_arr[x][y]) + 1;
           
           if (newIdx < moves.length) {
-            board[x][y] = moves[newIdx];
+            this.board_arr[x][y] = moves[newIdx];
             backtrack = false;
           } else {
-            board[x][y] = 0;
-            tempBoard[x][y] = [];
+            this.board_arr[x][y] = 0;
+            this.tempBoard[x][y] = [];
           }
         } else {
           const moves = [];
           for (let num = 1; num <= 9; num += 1) {
-            if (this.checkDuplication(board, num, x, y)) {
+            if (this.checkDuplication(this.board_arr, num, x, y)) {
               moves.push(num);
             }
           }
-         tempBoard[x][y] = moves;
+         this.tempBoard[x][y] = moves;
           if (moves.length === 0) {
             backtrack = true;
           }
-          else board[x][y] = moves[0];
+          else this.board_arr[x][y] = moves[0];
         }
 
         /**
          * Uncomment this to view the process step by step
          */
         // console.log(`---------------------${counter}-----------------------`);
-        // console.log('board : ');
-        // console.log(board);
+        // console.log('this.board_arr : ');
+        // console.log(this.board_arr);
         // console.log('Temp Board : ');
-        // console.log(tempBoard);
+        // console.log(this.tempBoard);
       }
 
 
       if (backtrack) {
         y -= 1;
         if (y === -1) {
-          y = board[0].length - 1;
+          y = this.board_arr[0].length - 1;
           x -= 1;
         }
         if (x === -1) x = 0;
       } else {
         y += 1;
-        if (y === board[0].length) {
+        if (y === this.board_arr[0].length) {
           y = 0;
           x += 1;
         }
       }
     }
 
-    this.board_arr = board;
+    const end = new Date().getTime() - start;
+
+    console.log(`\nFinished in ${end} ms\n`);
+
+    let str = '';
+    for (let i = 0; i < this.board_arr.length; i += 1) {
+      str += this.board_arr[i].join('');
+    }
+    this.board_string = str;
   }
 
   /**
@@ -143,14 +166,6 @@ class Sudoku {
    * @returns {String} - a string representation of sudoku board
    */
   board() {
-    let str = "";
-    for (let i = 0; i < this.board_arr.length; i += 1) {
-      for (let j = 0; j < this.board_arr[i].length; j += 1) {
-        str += this.board_arr[i][j];
-      }
-    }
-
-    this.board_string = str;
     return this.board_string;
   }
 
@@ -158,7 +173,7 @@ class Sudoku {
    * @function - this will return this.board_arr
    * @returns {Object[]} - an array representation of sudoku board
    */
-  printBoard() {
+  printBoardArr() {
     return this.board_arr;
   }
 }
@@ -168,11 +183,14 @@ class Sudoku {
 var fs = require('fs');
 var board_string = fs.readFileSync('set-01_sample.unsolved.txt')
   .toString()
-  .split("\n")[0];
+  .split("\n")[13];
 
 var game = new Sudoku(board_string);
 
 // Remember: this will just fill out what it can and not "guess"
 game.solve();
 
+console.log('String: ');
 console.log(game.board());
+console.log('Solved: ');
+console.log(game.printBoardArr());
