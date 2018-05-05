@@ -10,10 +10,23 @@ class Sudoku {
       // checkrow
     let board = this.board();
     let zeroCoordinates = this.getZeros(board)
-    let value = 1;
     let counter = 0;
 
     //console.log(zeroCoordinates)
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (board[i][j] === 0) {
+          for (let val = 1; val <= 9; val++) {
+            if (this.checkHorizontal(board, val, j) &&
+                this.checkVertical(board, val, i) &&
+                this.checkBox(board, val, j, i)) {
+              board[i][j] = val;
+            }
+          }
+        }
+      }
+    }
+    return board;
   }
 
   getZeros(board) {
@@ -32,7 +45,7 @@ class Sudoku {
   checkHorizontal(board, number, x) {
     //let board = this.board();
     for (let i = 0; i < 9; i++) {
-      if (number === board[i][x]) return false;
+      if (number === board[x][i]) return false;
     }
     return true;
   }
@@ -40,7 +53,7 @@ class Sudoku {
   checkVertical(board, number, y) {
     //let board = this.board();
     for (let i = 0; i < 9; i++) {
-      if (number === board[y][i]) return false;
+      if (number === board[i][y]) return false;
     }
     return true;
   }
